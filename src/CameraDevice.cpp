@@ -107,55 +107,55 @@ int StereoCameraDriver::set_control(uint32_t id, int val)
 
 }
 
-void StereoCameraDriver::grabNextFrame(cv::Mat& img_left, cv::Mat& img_right)
+void StereoCameraDriver::grabNextFrame(cv::Mat& img_ir, cv::Mat& img_rgb)
 {
-  struct v4l2_buffer buf = {0};
-  buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  buf.memory = V4L2_MEMORY_MMAP;
-  buf.index = 0;
+	struct v4l2_buffer buf = {0};
+	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	buf.memory = V4L2_MEMORY_MMAP;
+	buf.index = 0;
 
-  if(xioctl(fd_, VIDIOC_QBUF, &buf) == -1)
-    throw std::runtime_error("Query Buffer");
+	if(xioctl(fd_, VIDIOC_QBUF, &buf) == -1)
+		throw std::runtime_error("Query Buffer");
 
-  if(xioctl(fd_, VIDIOC_STREAMON, &buf.type) == -1)
-    throw std::runtime_error("Start Capture");
+	if(xioctl(fd_, VIDIOC_STREAMON, &buf.type) == -1)
+		throw std::runtime_error("Start Capture");
 
-  fd_set fds;
-  FD_ZERO(&fds);
-  FD_SET(fd_, &fds);
-  struct timeval tv = {0};
-  tv.tv_sec = 2;
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(fd_, &fds);
+	struct timeval tv = {0};
+	tv.tv_sec = 2;
 
-  if(select(fd_+1, &fds, NULL, NULL, &tv) == -1)
-    throw std::runtime_error("Waiting for Frame");
+	if(select(fd_+1, &fds, NULL, NULL, &tv) == -1)
+		throw std::runtime_error("Waiting for Frame");
 
-  if(xioctl(fd_, VIDIOC_DQBUF, &buf) == -1)
-    throw std::runtime_error("Retrieving Frame");
+	if(xioctl(fd_, VIDIOC_DQBUF, &buf) == -1)
+		throw std::runtime_error("Retrieving Frame");
 
-  //printf("bytes used: %d\n", buf.bytesused);
+	//printf("bytes used: %d\n", buf.bytesused);
 
-  // de-interleave image
-  uint8_t* pixel = buffer_;
-  for( int i=0;i< FRAME_WIDTH;i+=2)
-    for( int j=0;j< FRAME_HEIGHT;j+=2)
-  {
-    // each pixel is defined in 24 bits (3 bytes)
-    // the following was found out by trial and error:
-    // - the first 4b are always zero
-    // - the second byte are the MSb of the left image.
-    // - the third byte are the MSb of the right image.
-    // - the last 4b of the first byte may be the LSb of both,
-    //   they are not used here.
-    int b= buffer_[2*(i+(j+1)*FRAME_WIDTH)]+256*buffer_[2*(i+(j+1)*FRAME_WIDTH)+1];
-    if (b>255) b=255;
-    img_left.at<uint8_t>(j+0, i+0) = b;
-    img_left.at<uint8_t>(j+0, i+1) = b;
-    img_left.at<uint8_t>(j+1, i+0) = b;
-    img_left.at<uint8_t>(j+1, i+1) = b;
+	// de-interleave image
+	uint8_t* pixel = buffer_;
+	for( int i=0;i< FRAME_WIDTH;i+=2)
+		for( int j=0;j< FRAME_HEIGHT;j+=2)
+		{
+			// each pixel is defined in 24 bits (3 bytes)
+			// the following was found out by trial and error:
+			// - the first 4b are always zero
+			// - the second byte are the MSb of the left image.
+			// - the third byte are the MSb of the right image.
+			// - the last 4b of the first byte may be the LSb of both,
+			//   they are not used here.
+			int pos = 2*(i+(j+1)*FRAME_WIDTH);
+			int ir = buffer_[pos]+256*buffer_[pos+1];
+			if (ir>255) ir=255;
+			img_ir.at<uint8_t>(j/2, i/2) = ir;
 
-    //img_right.at<uint8_t>(i, j) = pixel[2];
-    //pixel = ;
-  }
+			img_rgb.at<uint8_t>(j/2, i/2) = ir;
+
+			//img_right.at<uint8_t>(i, j) = pixel[2];
+			//pixel = ;
+		}
 }
 
 void StereoCameraDriver::printCapabilities()

@@ -105,7 +105,7 @@ void CameraDriver::configCallback(e_cam40_ros_driver::cam40Config &config, uint3
 
 void CameraDriver::run()
 {
-	cv::Mat left_image(FRAME_HEIGHT, FRAME_WIDTH, CV_8UC1);
+	cv::Mat left_image(FRAME_HEIGHT/2, FRAME_WIDTH/2, CV_8UC1);
 	cv::Mat right_image(FRAME_HEIGHT, FRAME_WIDTH, CV_8UC1);
 
 	while( ros::ok() )
@@ -115,7 +115,7 @@ void CameraDriver::run()
 
 		ros::Time timestamp = ros::Time::now();
 
-        //Encoding information in the image
+		//Encoding information in the image
 		std_msgs::Header header;
 		header.seq = next_seq_;
 		header.stamp = timestamp;

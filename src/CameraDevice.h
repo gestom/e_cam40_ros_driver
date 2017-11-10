@@ -28,7 +28,7 @@ class StereoCameraDriver
     // file descriptor for camera device
     int fd_;
 
-    // image data buffer
+    // image data buffers
     uint8_t* buffer_;
 
   // helper functions
