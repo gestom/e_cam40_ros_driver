@@ -25,7 +25,7 @@ static int xioctl(int fd, int request, void* arg)
 
 StereoCameraDriver::StereoCameraDriver(const std::string& device)
 {
-  fd_ = open(device, O_RDWR);
+  fd_ = open(device.c_str(), O_RDWR);
   if (fd_ < 0)
     throw std::runtime_error("Opening video device");
 
