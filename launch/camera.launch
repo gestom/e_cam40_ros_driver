@@ -1,0 +1,26 @@
+<launch>
+
+  <group ns="stereo">
+
+    <node name="tara_camera" pkg="e_cam40_ros_driver" type="tara_camera_node" output="screen">
+
+  	  <param name="device_id" type="int" value="1" />
+      
+      <param name="width" type="int" value="752" />
+      <param name="height" type="int" value="480" />
+      <!-- <param name="fps" type="int" value="15" /> -->
+
+      <param name="left/camera_info_url" value="file://$(find tara_camera_driver)/calib/calib_left.yml"/>
+      <param name="right/camera_info_url" value="file://$(find tara_camera_driver)/calib/calib_right.yml"/>
+
+      <param name="left/camera_name" value="tara_left"/>
+      <param name="right/camera_name" value="tara_right"/>
+
+      <param name="exposure" type="int" value="1000" />
+      <param name="brightness" type="int" value="4" />
+
+    </node>
+
+  </group>
+
+</launch>
