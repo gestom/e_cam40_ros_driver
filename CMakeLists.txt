@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 generate_dynamic_reconfigure_options(
-        cfg/taraCamera.cfg
+        cfg/cam40.cfg
 )
 
 catkin_package(

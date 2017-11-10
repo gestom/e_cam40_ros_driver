@@ -56,7 +56,7 @@ CameraDriver::CameraDriver(const std::string& device, ros::NodeHandle nh, ros::N
   , targetBrightness(128)
 {
     /* server for dynamic reconfiguration of camera parameters */
-	dynamic_reconfigure::Server<e_cam40_ros_driver::taraCameraConfig>::CallbackType cb = boost::bind(&CameraDriver::configCallback, this, _1, _2);
+	dynamic_reconfigure::Server<e_cam40_ros_driver::cam40Config>::CallbackType cb = boost::bind(&CameraDriver::configCallback, this, _1, _2);
 	dyn_srv_.setCallback(cb);
 
     /* publishers of camera images */
@@ -89,7 +89,7 @@ CameraDriver::CameraDriver(const std::string& device, ros::NodeHandle nh, ros::N
 }
 
 /*receive parameters from dynamic reconfiguration and set them*/
-void CameraDriver::configCallback(e_cam40_ros_driver::taraCameraConfig &config, uint32_t level)
+void CameraDriver::configCallback(e_cam40_ros_driver::cam40Config &config, uint32_t level)
 {
   autoExposure = config.autoExposure;
   if (autoExposure == false) exposure = config.exposure;

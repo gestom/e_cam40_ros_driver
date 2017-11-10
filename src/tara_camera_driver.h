@@ -45,7 +45,7 @@
 #include "std_msgs/Int32.h"
 
 #include <dynamic_reconfigure/server.h>
-#include <e_cam40_ros_driver/taraCameraConfig.h>
+#include <e_cam40_ros_driver/cam40Config.h>
 
 namespace e_cam40_ros_driver
 {
@@ -77,7 +77,7 @@ class CameraDriver
     size_t next_seq_;
     std::string frame_id_;
 
-    dynamic_reconfigure::Server<e_cam40_ros_driver::taraCameraConfig> dyn_srv_;
+    dynamic_reconfigure::Server<e_cam40_ros_driver::cam40Config> dyn_srv_;
     int exposure;
     int brightness;
     bool autoExposure;
@@ -88,7 +88,7 @@ class CameraDriver
     std::string img_name;
 
     // dynamic reconfiguration of parameters
-    void configCallback(e_cam40_ros_driver::taraCameraConfig &config, uint32_t level);
+    void configCallback(e_cam40_ros_driver::cam40Config &config, uint32_t level);
 
 };
 
