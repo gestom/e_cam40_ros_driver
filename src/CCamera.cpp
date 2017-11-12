@@ -130,42 +130,51 @@ int CCamera::renewImage(cv::Mat& ir, cv::Mat& rgb)
 		return ret;
 	}
 	unsigned char *buffer = videoIn->framebuffer;
-	uint8_t* rowPtr = rgb.data;
-	for( int i=0;i< videoIn->width;i+=2){
-		for( int j=0;j< videoIn->height;j+=2)
-		{
-			// each pixel is defined in 24 bits (3 bytes)
-			// the following was found out by trial and error:
-			// - the first 4b are always zero
-			// - the second byte are the MSb of the left image.
-			// - the third byte are the MSb of the right image.
-			// - the last 4b of the first byte may be the LSb of both,
-			//   they are not used here.
-			int pos = 2*(i+(j+1)*videoIn->width);
-			int irv = buffer[pos]+256*buffer[pos+1];
-			if (irv>255) irv=255;
-			ir.at<uint8_t>(j/2, i/2) = irv;
+	int blue, red, green,pos,irv;
+    int maxVal = 255;
+	for( int j=0;j< videoIn->height-1;j++)
+	{
 
-			int blue = buffer[pos-2]+256*buffer[pos-1];
-			if (blue>255) blue=255;
+		if (j % 2 == 0) {
+			pos = 2*j*videoIn->width;
+		}else{
+			pos = 2*(j+1)*videoIn->width;
+		}
+		red = buffer[pos] + 256 * buffer[pos + 1];
+		if (red>maxVal)red = maxVal;
+		for( int i=0;i< videoIn->width;i++) {
+			if (j % 2 == 0) {
+				if (i % 2 == 0) {
+					pos = 2 * (i + j * videoIn->width);
+					green = buffer[pos + 2] + 256 * buffer[pos + 3];
+					blue = buffer[pos + videoIn->width * 2 + 2] + 256 * buffer[pos + videoIn->width * 2 + 3];
+					if (green>maxVal)green = maxVal;
+					if (blue>maxVal)blue = maxVal;
+					irv = buffer[pos+videoIn->width * 2] + 256 * buffer[pos + videoIn->width * 2+ 1];
+					if (irv > maxVal) irv = maxVal;
+				} else {
+					red = buffer[pos + 2] + 256 * buffer[pos + 3];
+					if (red>maxVal)red = maxVal;
+				}
+			} else {
+				if (i % 2 == 0) {
+					pos = 2 * (i + (j + 1) * videoIn->width);
+					green = buffer[pos + 2] + 256 * buffer[pos + 3];
+					blue = buffer[pos - videoIn->width * 2 + 2] + 256 * buffer[pos - videoIn->width * 2 + 3];
+					if (green > maxVal)green = maxVal;
+					if (blue > maxVal)blue = maxVal;
+					irv = buffer[pos-videoIn->width * 2] + 256 * buffer[pos - videoIn->width * 2+ 1];
+					if (irv > maxVal) irv = maxVal;
+				}else {
+					red = buffer[pos + 2] + 256 * buffer[pos + 3];
+					if (red > maxVal)red = maxVal;
+				}
+			}
 
-			pos = 2*(i+j*videoIn->width);
-			int green = buffer[pos]+256*buffer[pos+1];
-			if (green>255) green=255;
 
-			int red = buffer[pos+2]+256*buffer[pos+3];
-			if (red>255) red=255;
 			cv::Vec3b color(red,green,blue);
-			rgb.at<cv::Vec3b>(cv::Point(i/2,j/2)) = color;
-
-			//rowPtr[i/2*3 + 1] = irv;
-
-			//rowPtr[i/2*3 + 2] = irv;
-
-			//img_rgb.at<uint8_t>(j/2, i/2) = ir;
-
-			//img_right.at<uint8_t>(i, j) = pixel[2];
-			//pixel = ;
+			rgb.at<cv::Vec3b>(cv::Point(i,j)) = color;
+			ir.at<uint8_t>(j, i) = irv;
 		}	
 	}
 	return -1;

@@ -111,14 +111,12 @@ void CameraDriver::run()
 {
 
 
-	cv::Mat rgbImage(camera.height/2, camera.width/2, CV_8UC3);
-	cv::Mat irImage(camera.height/2, camera.width/2, CV_8UC1);
+	cv::Mat rgbImage(camera.height, camera.width, CV_8UC3);
+	cv::Mat irImage(camera.height, camera.width, CV_8UC1);
 
 	while( ros::ok() )
 	{
 		camera.renewImage(irImage,rgbImage);
-		//rgbImage, irImage);
-		//video_cam.updateFrame(rgbImage);
 
 		ros::Time timestamp = ros::Time::now();
 
