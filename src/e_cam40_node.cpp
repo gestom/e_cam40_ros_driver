@@ -31,65 +31,24 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
-#pragma once
 
 #include <ros/ros.h>
-#include <image_transport/image_transport.h>
-#include <image_transport/camera_publisher.h>
-#include <camera_info_manager/camera_info_manager.h>
 
-#include <opencv2/opencv.hpp>
+#include "e_cam40_driver.h"
 
-#include "CameraDevice.h"
-
-#include "std_msgs/Int32.h"
-
-#include <dynamic_reconfigure/server.h>
-#include <e_cam40_ros_driver/cam40Config.h>
-
-namespace e_cam40_ros_driver
+int main (int argc, char** argv)
 {
+  ros::init(argc, argv, "tara_camera");
 
-class CameraDriver
-{
-  public:
+  ros::NodeHandle nh;
+  ros::NodeHandle nhp("~");
 
-    CameraDriver(const std::string& device, ros::NodeHandle nh, ros::NodeHandle nhp);
+  std::string device;
+  nhp.param<std::string>("device", device, "/dev/video0");
 
-    /**
-     * @brief Run the data acquisition polling loop. Blocking!
-     */
-    void run();
+  e_cam40_ros_driver::CameraDriver driver(device, nh, nhp);
 
-  private:
+  driver.run();
 
-    ros::NodeHandle nh_, nhp_;
-
-    tara::StereoCameraDriver tara_cam_;
-    //Cameraproperty::Cameraproperty cam_property;
-    //Videostreaming::Videostreaming video_cam;
-
-    image_transport::ImageTransport it_;
-    image_transport::CameraPublisher cam_pub_left_, cam_pub_right_;
-
-    camera_info_manager::CameraInfoManager cinfo_manager_left_, cinfo_manager_right_;
-
-    size_t next_seq_;
-    std::string frame_id_;
-
-    dynamic_reconfigure::Server<e_cam40_ros_driver::cam40Config> dyn_srv_;
-    int exposure;
-    int brightness;
-    bool autoExposure;
-    float exposureGain;
-    int targetBrightness;
-
-    // image prefix name
-    std::string img_name;
-
-    // dynamic reconfiguration of parameters
-    void configCallback(e_cam40_ros_driver::cam40Config &config, uint32_t level);
-
-};
-
-};
+  return EXIT_SUCCESS;
+}

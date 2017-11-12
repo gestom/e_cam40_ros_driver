@@ -50,18 +50,18 @@ link_directories( ${catkin_LINK_DIRS} )
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-add_executable(tara_camera_node src/tara_camera_node.cpp src/tara_camera_driver.cpp src/CameraDevice.cpp src/tara/xunit_lib_tara.cpp src/tara/Tara.cpp)
-target_link_libraries(tara_camera_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${GLIB_LIBRARIES} udev v4l2)
-add_dependencies(tara_camera_node ${PROJECT_NAME}_gencfg)
+add_executable(e_cam40_node src/e_cam40_node.cpp src/e_cam40_driver.cpp src/CCamera.cpp src/v4l2uvc.c)
+target_link_libraries(e_cam40_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${GLIB_LIBRARIES} udev v4l2)
+add_dependencies(e_cam40_node ${PROJECT_NAME}_gencfg)
 
-add_executable(tara_camera_tester src/tara_camera_tester.cpp src/CameraDevice.cpp src/tara/xunit_lib_tara.cpp src/tara/Tara.cpp)
-target_link_libraries(tara_camera_tester ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${GLIB_LIBRARIES} udev v4l2)
-add_dependencies(tara_camera_tester ${PROJECT_NAME}_gencfg)
+#add_executable(tara_camera_tester src/tara_camera_tester.cpp src/CameraDevice.cpp src/tara/xunit_lib_tara.cpp src/tara/Tara.cpp)
+#target_link_libraries(tara_camera_tester ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${GLIB_LIBRARIES} udev v4l2)
+#add_dependencies(tara_camera_tester ${PROJECT_NAME}_gencfg)
 
-add_library(tara_camera_nodelet src/tara_camera_nodelet.cpp src/tara_camera_driver.cpp src/CameraDevice.cpp src/tara/xunit_lib_tara.cpp src/tara/Tara.cpp)
-target_link_libraries(tara_camera_nodelet ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${GLIB_LIBRARIES} udev v4l2)
+#add_library(tara_camera_nodelet src/tara_camera_nodelet.cpp src/tara_camera_driver.cpp src/CameraDevice.cpp src/tara/xunit_lib_tara.cpp src/tara/Tara.cpp)
+#target_link_libraries(tara_camera_nodelet ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${GLIB_LIBRARIES} udev v4l2)
 
-install(TARGETS tara_camera_node tara_camera_nodelet
+install(TARGETS e_cam40_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
