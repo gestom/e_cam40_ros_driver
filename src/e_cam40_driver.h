@@ -66,13 +66,11 @@ class CameraDriver
     ros::NodeHandle nh_, nhp_;
 
     CCamera camera;
-    //Cameraproperty::Cameraproperty cam_property;
-    //Videostreaming::Videostreaming video_cam;
 
     image_transport::ImageTransport it_;
-    image_transport::CameraPublisher cam_pub_ir_, cam_pub_right_;
+    image_transport::CameraPublisher cam_pub_ir_, cam_pub_rgb_;
 
-    camera_info_manager::CameraInfoManager cinfo_manager_ir_, cinfo_manager_right_;
+    camera_info_manager::CameraInfoManager cinfo_manager_ir_, cinfo_manager_rgb_;
 
     size_t next_seq_;
     std::string frame_id_;
@@ -83,6 +81,7 @@ class CameraDriver
     bool autoExposure;
     float exposureGain;
     int targetBrightness;
+    int expImageType;
 
     // image prefix name
     std::string img_name;

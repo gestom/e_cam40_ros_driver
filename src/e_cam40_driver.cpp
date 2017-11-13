@@ -47,16 +47,18 @@ CameraDriver::CameraDriver(const std::string& device, ros::NodeHandle nh, ros::N
  , camera( ), it_( nh )
 //	,
   , cinfo_manager_ir_( ros::NodeHandle(nhp, "ir") )
-  , cinfo_manager_right_( ros::NodeHandle(nhp, "rgb") )
+  , cinfo_manager_rgb_( ros::NodeHandle(nhp, "rgb") )
   , next_seq_( 0 )
-  , exposure(1000)
-  , brightness(1)
+  , exposure(156)
+  , brightness(10)
   , autoExposure(true)
   , exposureGain(1.0)
   , targetBrightness(128)
 {
 	int  imageWidth= 600;
 	int  imageHeight = 400;
+    nhp.param("imageWidth", imageWidth, imageWidth);
+    nhp.param("imageHeight", imageHeight, imageHeight);
 	camera.init(device.c_str(),&imageWidth,&imageHeight);
 
     /* server for dynamic reconfiguration of camera parameters */
@@ -65,27 +67,27 @@ CameraDriver::CameraDriver(const std::string& device, ros::NodeHandle nh, ros::N
 
     /* publishers of camera images */
 	cam_pub_ir_ = it_.advertiseCamera("ir/image_raw", 1, false);
-	cam_pub_right_ = it_.advertiseCamera("rgb/image_raw", 1, false);
+	cam_pub_rgb_ = it_.advertiseCamera("rgb/image_raw", 1, false);
 
     /* load and set parameters */
 	nhp.param<std::string>("frame_id", frame_id_, "e_con40_camera");
 
-	std::string ir_camera_info_url, right_camera_info_url;
+	std::string ir_camera_info_url, rgb_camera_info_url;
 	if (nhp.hasParam("ir/camera_info_url"))
 		nhp.param<std::string>("ir/camera_info_url", ir_camera_info_url, "");
 
-	if (nhp.hasParam("right/camera_info_url"))
-		nhp.param<std::string>("right/camera_info_url", right_camera_info_url, "");
+	if (nhp.hasParam("rgb/camera_info_url"))
+		nhp.param<std::string>("rgb/camera_info_url", rgb_camera_info_url, "");
 
     cinfo_manager_ir_.loadCameraInfo( ir_camera_info_url );
-    cinfo_manager_right_.loadCameraInfo( right_camera_info_url );
+    cinfo_manager_rgb_.loadCameraInfo( rgb_camera_info_url );
 
-    std::string ir_camera_name, right_camera_name;
-    nhp.param<std::string>("ir/camera_name", ir_camera_name, "e_con40_ir");
-    nhp.param<std::string>("right/camera_name", right_camera_name, "tara_right");
+    std::string ir_camera_name, rgb_camera_name;
+    nhp.param<std::string>("ir/camera_name", ir_camera_name, "e_cam40_ir");
+    nhp.param<std::string>("rgb/camera_name", rgb_camera_name, "e_cam40_rgb");
 
 	cinfo_manager_ir_.setCameraName(ir_camera_name);
-	cinfo_manager_right_.setCameraName(right_camera_name);
+	cinfo_manager_rgb_.setCameraName(rgb_camera_name);
 
 	ros::NodeHandle pnh("~");
 	pnh.param("exposure", exposure, exposure);
@@ -100,6 +102,7 @@ void CameraDriver::configCallback(e_cam40_ros_driver::cam40Config &config, uint3
   targetBrightness = config.targetBrightness;
   brightness = config.brightness;
   exposureGain = config.exposureGain;
+  expImageType = config.expImageType;
 
   camera.setExposition(exposure);
   camera.setBrightness(brightness);
@@ -127,7 +130,7 @@ void CameraDriver::run()
 		header.frame_id = frame_id_;
 
 		// Convert OpenCV image to ROS image msg.
-		cv_bridge::CvImage bridge_image_right(header, sensor_msgs::image_encodings::BGR8, rgbImage);
+		cv_bridge::CvImage bridge_image_rgb(header, sensor_msgs::image_encodings::BGR8, rgbImage);
 		cv_bridge::CvImage bridge_image_ir(header, sensor_msgs::image_encodings::MONO8, irImage);
 
 		sensor_msgs::CameraInfo::Ptr camera_info_ir(new sensor_msgs::CameraInfo(cinfo_manager_ir_.getCameraInfo()));
@@ -135,12 +138,17 @@ void CameraDriver::run()
 		camera_info_ir->header = header;
 
 		cam_pub_ir_.publish(bridge_image_ir.toImageMsg(), camera_info_ir);
-		cam_pub_right_.publish(bridge_image_right.toImageMsg(), camera_info_ir);
+		cam_pub_rgb_.publish(bridge_image_rgb.toImageMsg(), camera_info_ir);
 
 		//automatic exposure control - trying to target a given mean brightness of the captured images
 		if (autoExposure){
 			if (next_seq_++%5 == 0){
-				cv::Mat tmp = irImage(cv::Rect(0,0,rgbImage.cols,rgbImage.rows/2));
+				cv::Mat tmp;
+				if(expImageType==1) {
+					tmp = irImage(cv::Rect(0, 0, irImage.cols, irImage.rows / 2));
+				} else if (expImageType==0){
+					tmp = rgbImage(cv::Rect(0,0,rgbImage.cols,rgbImage.rows/2));
+				}
 				float sum = cv::sum(tmp).val[0]/tmp.rows/tmp.cols;
 				ROS_INFO("Image brightness %.3f %i",sum,exposure);
 				exposure += exposureGain*(targetBrightness/sum*exposure-exposure);   //adaptive step for exposure setting

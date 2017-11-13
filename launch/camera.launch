@@ -1,26 +1,34 @@
 <launch>
 
-  <group ns="stereo">
+  <!--group ns="stereo"-->
 
-    <node name="tara_camera" pkg="e_cam40_ros_driver" type="tara_camera_node" output="screen">
+    <node name="e_cam40" pkg="e_cam40_ros_driver" type="e_cam40_node" output="screen">
 
-  	  <param name="device_id" type="int" value="1" />
-      
-      <param name="width" type="int" value="752" />
-      <param name="height" type="int" value="480" />
+  	  <param name="device" type="str" value="/dev/video1" />
+
       <!-- <param name="fps" type="int" value="15" /> -->
 
-      <param name="left/camera_info_url" value="file://$(find tara_camera_driver)/calib/calib_left.yml"/>
-      <param name="right/camera_info_url" value="file://$(find tara_camera_driver)/calib/calib_right.yml"/>
+      <!-- param name="left/camera_info_url" value="file://$(find tara_camera_driver)/calib/calib_left.yml"/ -->
+      <!-- param name="right/camera_info_url" value="file://$(find tara_camera_driver)/calib/calib_right.yml"/ -->
 
-      <param name="left/camera_name" value="tara_left"/>
-      <param name="right/camera_name" value="tara_right"/>
+      <param name="ir/camera_name" value="ir_cam"/>
+      <param name="rgb/camera_name" value="rgb_cam"/>
 
-      <param name="exposure" type="int" value="1000" />
-      <param name="brightness" type="int" value="4" />
+      <param name="exposure" type="int" value="156" />
+      <param name="brightness" type="int" value="10" />
+
+      <param name="imageWidth" type="int" value="672" />
+      <param name="imageHeight" type="int" value="380" />
+
+      <!-- other possible image sizes:
+                672x380
+                1280x720
+                1920x1080
+                2688x1520
+                -->
 
     </node>
 
-  </group>
+  <!--/group-->
 
 </launch>
