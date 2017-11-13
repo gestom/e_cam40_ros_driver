@@ -44,7 +44,7 @@ int main (int argc, char** argv)
   ros::NodeHandle nhp("~");
 
   std::string device;
-  nhp.param<std::string>("device", device, "/dev/video1");
+  nhp.param<std::string>("device", device, "/dev/video0");
 
   e_cam40_ros_driver::CameraDriver driver(device, nh, nhp);
 
